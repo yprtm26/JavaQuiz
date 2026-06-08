@@ -5,23 +5,33 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.compose.material3.Text
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.javaquiz.ui.auth.AuthViewModel
 import com.example.javaquiz.ui.auth.LoginScreen
+import com.example.javaquiz.ui.auth.RegisterScreen
 import com.example.javaquiz.ui.home.HomeScreen
 
 @Composable
 fun NavGraph(navController: NavHostController) {
+    val authViewModel: AuthViewModel = viewModel()
+
     NavHost(
         navController = navController,
         startDestination = Screen.Login.route
     ) {
         composable(Screen.Login.route) {
             LoginScreen(
-                onLoginClick = { navController.navigate(Screen.Home.route) },
-                onRegisterClick = { navController.navigate(Screen.Register.route) }
+                onLoginSuccess = { navController.navigate(Screen.Home.route) },
+                onGoogleLoginClick = { /* Handle Google Login */ },
+                onRegisterNavigate = { navController.navigate(Screen.Register.route) },
+                viewModel = authViewModel
             )
         }
         composable(Screen.Register.route) {
-            Text("Register Screen")
+            RegisterScreen(
+                onRegisterClick = { /* Handle registration logic */ },
+                onLoginNavigate = { navController.popBackStack() }
+            )
         }
         composable(Screen.Home.route) {
             HomeScreen()

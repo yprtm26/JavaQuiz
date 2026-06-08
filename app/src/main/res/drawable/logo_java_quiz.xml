@@ -1,0 +1,37 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="100dp"
+    android:height="100dp"
+    android:viewportWidth="100"
+    android:viewportHeight="100">
+    <!-- Rounded Background -->
+    <path
+        android:fillColor="#2563EB"
+        android:pathData="M25,0 L75,0 C88.81,0 100,11.19 100,25 L100,75 C100,88.81 88.81,100 75,100 L25,100 C11.19,100 0,88.81 0,75 L0,25 C0,11.19 11.19,0 25,0 Z" />
+    <!-- Cup Body -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M30,65 L60,65 C65.52,65 70,60.52 70,55 L70,40 L20,40 L20,55 C20,60.52 24.48,65 30,65 Z" />
+    <!-- Handle -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M70,45 L74,45 C76.21,45 78,46.79 78,49 C78,51.21 76.21,53 74,53 L70,53 L70,45 Z" />
+    <!-- Steam Lines (Vertical Wavy) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M35,32 C35,32 33,28 35,24 C37,20 35,16 35,16"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M45,32 C45,32 43,28 45,24 C47,20 45,16 45,16"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M55,32 C55,32 53,28 55,24 C57,20 55,16 55,16"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round" />
+</vector>
