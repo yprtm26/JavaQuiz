@@ -1,10 +1,10 @@
 package com.example.javaquiz.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.material3.Text
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.compose.material3.Text
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.javaquiz.ui.auth.AuthViewModel
 import com.example.javaquiz.ui.auth.LoginScreen
@@ -21,7 +21,9 @@ fun NavGraph(navController: NavHostController) {
     ) {
         composable(Screen.Login.route) {
             LoginScreen(
-                onLoginSuccess = { navController.navigate(Screen.Home.route) },
+                onLoginSuccess = { navController.navigate(Screen.Home.route) {
+                    popUpTo(Screen.Login.route) { inclusive = true }
+                } },
                 onGoogleLoginClick = { /* Handle Google Login */ },
                 onRegisterNavigate = { navController.navigate(Screen.Register.route) },
                 viewModel = authViewModel
@@ -29,15 +31,21 @@ fun NavGraph(navController: NavHostController) {
         }
         composable(Screen.Register.route) {
             RegisterScreen(
-                onRegisterClick = { /* Handle registration logic */ },
-                onLoginNavigate = { navController.popBackStack() }
+                onRegisterSuccess = {
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(Screen.Register.route) { inclusive = true }
+                    }
+                },
+                onLoginNavigate = { navController.popBackStack() },
+                viewModel = authViewModel
             )
         }
         composable(Screen.Home.route) {
-            HomeScreen()
+            HomeScreen(navController = navController)
         }
-        composable(Screen.Quiz.route) {
-            Text("Quiz Screen")
+        composable(Screen.Quiz.route + "/{categoryId}") { backStackEntry ->
+            val categoryId = backStackEntry.arguments?.getString("categoryId")
+            Text("Quiz Screen - $categoryId")
         }
         composable(Screen.Result.route) {
             Text("Result Screen")

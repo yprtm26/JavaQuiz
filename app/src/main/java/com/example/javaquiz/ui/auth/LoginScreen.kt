@@ -38,6 +38,17 @@ fun LoginScreen(
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
 
+    val isLoading by viewModel.isLoading
+    val error by viewModel.error
+    val loginSuccess by viewModel.registrationSuccess // Using the same success state for simplicity, or we could add loginSuccess
+
+    LaunchedEffect(loginSuccess) {
+        if (loginSuccess) {
+            onLoginSuccess()
+            viewModel.resetRegistrationSuccess()
+        }
+    }
+
     val primaryColor = Color(0xFF0052CC) // Match the blue in the image
     val backgroundColor = Color(0xFFF8FAFC)
     val labelColor = Color(0xFF334155)
@@ -56,6 +67,7 @@ fun LoginScreen(
                 .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // ... (Logo, Title, Tagline)
             // 1. Logo
             Image(
                 painter = painterResource(id = R.drawable.logo_java_quiz),
@@ -86,6 +98,15 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(40.dp))
 
+            if (error != null) {
+                Text(
+                    text = error!!,
+                    color = Color.Red,
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+            }
+
             // 4. Email Field
             Column(modifier = Modifier.fillMaxWidth()) {
                 Text(
@@ -103,6 +124,7 @@ fun LoginScreen(
                         .padding(top = 6.dp),
                     shape = RoundedCornerShape(8.dp),
                     singleLine = true,
+                    enabled = !isLoading,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = primaryColor,
                         unfocusedBorderColor = borderColor,
@@ -131,6 +153,7 @@ fun LoginScreen(
                         .padding(top = 6.dp),
                     shape = RoundedCornerShape(8.dp),
                     singleLine = true,
+                    enabled = !isLoading,
                     visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     trailingIcon = {
                         IconButton(onClick = { passwordVisible = !passwordVisible }) {
@@ -154,19 +177,28 @@ fun LoginScreen(
 
             // 6. Login Button
             Button(
-                onClick = onLoginSuccess,
+                onClick = { 
+                    if (email.isNotEmpty() && password.isNotEmpty()) {
+                        viewModel.login(email, password)
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp),
                 shape = RoundedCornerShape(8.dp),
+                enabled = !isLoading,
                 colors = ButtonDefaults.buttonColors(containerColor = primaryColor)
             ) {
-                Text(
-                    text = "Masuk",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                )
+                if (isLoading) {
+                    CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
+                } else {
+                    Text(
+                        text = "Masuk",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(32.dp))

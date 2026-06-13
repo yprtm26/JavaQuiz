@@ -26,8 +26,9 @@ import com.example.javaquiz.R
 
 @Composable
 fun RegisterScreen(
-    onRegisterClick: () -> Unit,
-    onLoginNavigate: () -> Unit
+    onRegisterSuccess: () -> Unit,
+    onLoginNavigate: () -> Unit,
+    viewModel: AuthViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
     val primaryColor = Color(0xFF0052CC) 
     val backgroundColor = Color(0xFFF8FAFC)
@@ -38,6 +39,17 @@ fun RegisterScreen(
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+
+    val isLoading by viewModel.isLoading
+    val error by viewModel.error
+    val registrationSuccess by viewModel.registrationSuccess
+
+    LaunchedEffect(registrationSuccess) {
+        if (registrationSuccess) {
+            onRegisterSuccess()
+            viewModel.resetRegistrationSuccess()
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -85,6 +97,15 @@ fun RegisterScreen(
             border = BorderStroke(1.dp, borderColor)
         ) {
             Column(modifier = Modifier.padding(20.dp)) {
+                if (error != null) {
+                    Text(
+                        text = error!!,
+                        color = Color.Red,
+                        fontSize = 12.sp,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                }
+
                 // Nama Lengkap
                 Text(
                     text = "Nama Lengkap",
@@ -99,6 +120,7 @@ fun RegisterScreen(
                     modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
                     shape = RoundedCornerShape(8.dp),
                     singleLine = true,
+                    enabled = !isLoading,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = primaryColor,
                         unfocusedBorderColor = borderColor,
@@ -123,6 +145,7 @@ fun RegisterScreen(
                     modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
                     shape = RoundedCornerShape(8.dp),
                     singleLine = true,
+                    enabled = !isLoading,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = primaryColor,
                         unfocusedBorderColor = borderColor,
@@ -149,6 +172,7 @@ fun RegisterScreen(
                     modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
                     shape = RoundedCornerShape(8.dp),
                     singleLine = true,
+                    enabled = !isLoading,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = primaryColor,
                         unfocusedBorderColor = borderColor,
@@ -161,12 +185,21 @@ fun RegisterScreen(
 
                 // Tombol Daftar
                 Button(
-                    onClick = onRegisterClick,
+                    onClick = { 
+                        if (name.isNotEmpty() && email.isNotEmpty() && password.isNotEmpty()) {
+                            viewModel.register(name, email, password)
+                        }
+                    },
                     modifier = Modifier.fillMaxWidth().height(52.dp),
                     shape = RoundedCornerShape(8.dp),
+                    enabled = !isLoading,
                     colors = ButtonDefaults.buttonColors(containerColor = primaryColor)
                 ) {
-                    Text("Daftar", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    if (isLoading) {
+                        CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
+                    } else {
+                        Text("Daftar", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(28.dp))

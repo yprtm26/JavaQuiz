@@ -19,7 +19,7 @@ object AppwriteClient {
     fun init(context: Context) {
         client = Client(context)
             .setEndpoint("https://nyc.cloud.appwrite.io/v1") // Sesuai url di dashboard Anda
-            .setProject("dbyarsi") // ID Project Appwrite Anda
+            .setProject("javaquiz") // ID Project Appwrite Anda
 
         account = Account(client)
         databases = Databases(client)
