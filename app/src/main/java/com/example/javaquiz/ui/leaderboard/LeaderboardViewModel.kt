@@ -35,6 +35,13 @@ class LeaderboardViewModel : ViewModel() {
 
     private var realtimeSubscription: RealtimeSubscription? = null
 
+    fun refreshCurrentUser() {
+        viewModelScope.launch {
+            val user = AuthRepository().getCurrentUser()
+            currentUserId = user?.id ?: ""
+        }
+    }
+
     init {
         viewModelScope.launch {
             val user = AuthRepository().getCurrentUser()

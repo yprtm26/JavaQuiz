@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.javaquiz.data.remote.AuthRepository
+import com.example.javaquiz.data.remote.SessionData
 import kotlinx.coroutines.launch
 
 class AuthViewModel : ViewModel() {
@@ -25,6 +26,7 @@ class AuthViewModel : ViewModel() {
             _error.value = null
             try {
                 repository.createAccount(name, email, password)
+                SessionData.photoFileId = ""
                 _registrationSuccess.value = true
             } catch (e: Exception) {
                 _error.value = e.message ?: "Registrasi gagal"
@@ -40,6 +42,7 @@ class AuthViewModel : ViewModel() {
             _error.value = null
             try {
                 repository.login(email, password)
+                SessionData.photoFileId = ""
                 _registrationSuccess.value = true // Reusing this for navigation
             } catch (e: Exception) {
                 _error.value = e.message ?: "Login gagal"

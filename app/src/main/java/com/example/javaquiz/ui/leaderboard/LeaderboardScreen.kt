@@ -41,6 +41,11 @@ fun LeaderboardScreen(
     navController: NavHostController,
     viewModel: LeaderboardViewModel = viewModel()
 ) {
+    LaunchedEffect(Unit) {
+        viewModel.refreshCurrentUser()
+        viewModel.fetchLeaderboard()
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()

@@ -129,6 +129,7 @@ class ProfileViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 authRepository.logout()
+                SessionData.photoFileId = ""
                 onComplete()
             } catch (_: Exception) {
                 onComplete()
