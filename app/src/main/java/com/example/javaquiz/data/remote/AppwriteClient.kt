@@ -6,23 +6,35 @@ import io.appwrite.services.Account
 import io.appwrite.services.Databases
 import io.appwrite.services.Storage
 
-object AppwriteClient {
-    lateinit var client: Client
-    lateinit var account: Account
-    lateinit var databases: Databases
-    lateinit var storage: Storage // Tambahkan service Storage
+class AppwriteClient(context: Context) {
+    val client = Client(context)
+        .setEndpoint(API_ENDPOINT)
+        .setProject(PROJECT_ID)
+    val account = Account(client)
+    val databases = Databases(client)
+    val storage = Storage(client)
+    val realtime = io.appwrite.services.Realtime(client)
 
-    // Konfigurasi ID Utama Appwrite Anda
-    const val DATABASE_ID = "javaquiz"
-    const val BUCKET_ID = "assets" // ID Bucket tunggal milik Anda
+    companion object {
+        const val API_ENDPOINT = "https://nyc.cloud.appwrite.io/v1"
+        const val PROJECT_ID = "javaquiz"
+        const val DATABASE_ID = "javaquiz"
+        const val BUCKET_ID = "assets"
+        const val CATEGORIES_COLLECTION_ID = "categories"
+        const val QUESTIONS_COLLECTION_ID = "questions"
+        const val QUIZ_HISTORY_COLLECTION_ID = "quiz_histories"
 
-    fun init(context: Context) {
-        client = Client(context)
-            .setEndpoint("https://nyc.cloud.appwrite.io/v1") // Sesuai url di dashboard Anda
-            .setProject("javaquiz") // ID Project Appwrite Anda
+        @Volatile
+        private var instance: AppwriteClient? = null
 
-        account = Account(client)
-        databases = Databases(client)
-        storage = Storage(client)
+        fun init(context: Context) {
+            if (instance != null) return
+            synchronized(this) {
+                if (instance != null) return
+                instance = AppwriteClient(context.applicationContext)
+            }
+        }
+
+        fun get(): AppwriteClient = instance ?: error("AppwriteClient not initialized")
     }
 }

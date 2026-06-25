@@ -1,12 +1,15 @@
 package com.example.javaquiz.ui.auth
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -14,33 +17,44 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.javaquiz.R
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
-    onGoogleLoginClick: () -> Unit,
     onRegisterNavigate: () -> Unit,
     viewModel: AuthViewModel
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+    var pressed by remember { mutableStateOf(false) }
 
     val isLoading by viewModel.isLoading
     val error by viewModel.error
-    val loginSuccess by viewModel.registrationSuccess // Using the same success state for simplicity, or we could add loginSuccess
+    val loginSuccess by viewModel.registrationSuccess
+    val scale by animateFloatAsState(
+        targetValue = if (pressed) 0.97f else 1f,
+        animationSpec = tween(100)
+    )
+    val loginInteractionSource = remember { MutableInteractionSource() }
+
+    LaunchedEffect(loginInteractionSource) {
+        loginInteractionSource.interactions.collect { interaction ->
+            when (interaction) {
+                is PressInteraction.Press -> pressed = true
+                is PressInteraction.Release -> pressed = false
+                is PressInteraction.Cancel -> pressed = false
+            }
+        }
+    }
 
     LaunchedEffect(loginSuccess) {
         if (loginSuccess) {
@@ -49,222 +63,182 @@ fun LoginScreen(
         }
     }
 
-    val primaryColor = Color(0xFF0052CC) // Match the blue in the image
-    val backgroundColor = Color(0xFFF8FAFC)
-    val labelColor = Color(0xFF334155)
-    val placeholderColor = Color(0xFF94A3B8)
-    val borderColor = Color(0xFFE2E8F0)
-
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(backgroundColor),
+            .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(horizontal = 16.dp)
+                .widthIn(max = 400.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(32.dp)
         ) {
-            // ... (Logo, Title, Tagline)
-            // 1. Logo
-            Image(
-                painter = painterResource(id = R.drawable.logo_java_quiz),
-                contentDescription = "Logo Java Quiz",
-                modifier = Modifier.size(110.dp),
-                contentScale = ContentScale.Fit
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // 2. Title
-            Text(
-                text = "JavaQuiz",
-                fontSize = 36.sp,
-                fontWeight = FontWeight.ExtraBold,
-                color = Color.Black,
-                textAlign = TextAlign.Center
-            )
-
-            // 3. Tagline
-            Text(
-                text = "Kuasai pengembangan Java melalui tantangan interaktif.",
-                fontSize = 14.sp,
-                color = Color(0xFF64748B),
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 4.dp)
-            )
-
-            Spacer(modifier = Modifier.height(40.dp))
-
-            if (error != null) {
-                Text(
-                    text = error!!,
-                    color = Color.Red,
-                    fontSize = 12.sp,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-            }
-
-            // 4. Email Field
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    text = "Email",
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 14.sp,
-                    color = labelColor
-                )
-                OutlinedTextField(
-                    value = email,
-                    onValueChange = { email = it },
-                    placeholder = { Text("name@example.com", color = placeholderColor) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 6.dp),
-                    shape = RoundedCornerShape(8.dp),
-                    singleLine = true,
-                    enabled = !isLoading,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = primaryColor,
-                        unfocusedBorderColor = borderColor,
-                        focusedContainerColor = Color.White,
-                        unfocusedContainerColor = Color.White
-                    )
-                )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // 5. Password Field
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    text = "Kata Sandi",
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 14.sp,
-                    color = labelColor
-                )
-                OutlinedTextField(
-                    value = password,
-                    onValueChange = { password = it },
-                    placeholder = { Text(".........", color = placeholderColor) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 6.dp),
-                    shape = RoundedCornerShape(8.dp),
-                    singleLine = true,
-                    enabled = !isLoading,
-                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                    trailingIcon = {
-                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                            Icon(
-                                imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                                contentDescription = null,
-                                tint = Color(0xFF64748B)
-                            )
-                        }
-                    },
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = primaryColor,
-                        unfocusedBorderColor = borderColor,
-                        focusedContainerColor = Color.White,
-                        unfocusedContainerColor = Color.White
-                    )
-                )
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // 6. Login Button
-            Button(
-                onClick = { 
-                    if (email.isNotEmpty() && password.isNotEmpty()) {
-                        viewModel.login(email, password)
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp),
-                shape = RoundedCornerShape(8.dp),
-                enabled = !isLoading,
-                colors = ButtonDefaults.buttonColors(containerColor = primaryColor)
+            // Header
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                if (isLoading) {
-                    CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
-                } else {
-                    Text(
-                        text = "Masuk",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // 7. Divider
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                HorizontalDivider(modifier = Modifier.weight(1f), color = borderColor)
-                Text(
-                    text = "Atau lanjutkan dengan",
-                    modifier = Modifier.padding(horizontal = 12.dp),
-                    color = Color(0xFF94A3B8),
-                    fontSize = 12.sp
-                )
-                HorizontalDivider(modifier = Modifier.weight(1f), color = borderColor)
-            }
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // 8. Google Login Button
-            OutlinedButton(
-                onClick = onGoogleLoginClick,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp),
-                shape = RoundedCornerShape(8.dp),
-                border = BorderStroke(1.dp, borderColor),
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Black)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = MaterialTheme.colorScheme.surface,
+                    tonalElevation = 2.dp
                 ) {
                     Image(
-                        painter = painterResource(id = R.drawable.ic_google_logo),
-                        contentDescription = "Google Logo",
-                        modifier = Modifier.size(20.dp)
+                        painter = painterResource(id = R.drawable.logo_java_quiz),
+                        contentDescription = "Logo Java Quiz",
+                        modifier = Modifier.size(80.dp)
                     )
-                    Spacer(modifier = Modifier.width(10.dp))
+                }
+
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
                     Text(
-                        text = "Google",
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Medium
+                        text = "Java Quiz",
+                        style = MaterialTheme.typography.displayLarge,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        textAlign = TextAlign.Center
+                    )
+                    Text(
+                        text = "Kuasai pengembangan Java melalui tantangan interaktif.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
+            // Form
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                if (error != null) {
+                    Text(
+                        text = error!!,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                }
 
-            // 9. Footer
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        text = "Email",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    OutlinedTextField(
+                        value = email,
+                        onValueChange = { email = it },
+                        placeholder = { Text("name@example.com", color = MaterialTheme.colorScheme.onSurfaceVariant) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = 48.dp),
+                        shape = RoundedCornerShape(8.dp),
+                        singleLine = true,
+                        enabled = !isLoading,
+                        textStyle = MaterialTheme.typography.bodyLarge,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = MaterialTheme.colorScheme.primaryContainer,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                            focusedContainerColor = MaterialTheme.colorScheme.surface,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surface
+                        )
+                    )
+                }
+
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        text = "Kata Sandi",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    OutlinedTextField(
+                        value = password,
+                        onValueChange = { password = it },
+                        placeholder = { Text("\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022", color = MaterialTheme.colorScheme.onSurfaceVariant) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = 48.dp),
+                        shape = RoundedCornerShape(8.dp),
+                        singleLine = true,
+                        enabled = !isLoading,
+                        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                        textStyle = MaterialTheme.typography.bodyLarge,
+                        trailingIcon = {
+                            IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                                Icon(
+                                    imageVector = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                    contentDescription = if (passwordVisible) "Sembunyikan sandi" else "Tampilkan sandi",
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        },
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = MaterialTheme.colorScheme.primaryContainer,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                            focusedContainerColor = MaterialTheme.colorScheme.surface,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surface
+                        )
+                    )
+                }
+
+                Button(
+                    onClick = {
+                        if (email.isNotEmpty() && password.isNotEmpty()) {
+                            viewModel.login(email, password)
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp)
+                        .scale(scale),
+                    shape = RoundedCornerShape(8.dp),
+                    enabled = !isLoading,
+                    interactionSource = loginInteractionSource,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer
+                    )
+                ) {
+                    if (isLoading) {
+                        CircularProgressIndicator(
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier.size(20.dp),
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Text(
+                            text = "Masuk",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
+                }
+            }
+
+            // Footer
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center
             ) {
                 Text(
                     text = "Belum punya akun? ",
-                    color = Color(0xFF64748B),
-                    fontSize = 14.sp
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
                     text = "Daftar",
-                    color = primaryColor,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.clickable { onRegisterNavigate() }
                 )
             }

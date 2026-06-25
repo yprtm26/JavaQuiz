@@ -11,6 +11,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import com.example.javaquiz.data.remote.AppwriteClient
+import com.example.javaquiz.data.remote.SessionData
 import com.example.javaquiz.ui.navigation.NavGraph
 import com.example.javaquiz.ui.theme.JavaQuizTheme
 
@@ -18,8 +19,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
-        // Inisialisasi Appwrite
+        // Inisialisasi Appwrite dan SessionData
         AppwriteClient.init(this)
+        SessionData.init(this)
 
         enableEdgeToEdge()
         setContent {

@@ -4,7 +4,6 @@ data class Category(
     val id: String,
     val name: String,
     val description: String,
-    val level: String,
     val iconName: String,
     val questionCount: Int = 0
 )
