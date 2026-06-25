@@ -71,10 +71,22 @@ class LeaderboardViewModel : ViewModel() {
             error = null
             val result = QuizRepository.getLeaderboard()
             if (result.isNotEmpty()) {
-                leaderboard = result
-                totalParticipants = result.size
+                val updated = if (currentUserId.isNotEmpty()) {
+                    val accountUser = AuthRepository().getCurrentUser()
+                    result.map { entry ->
+                        if (entry.userId == currentUserId && accountUser != null) {
+                            entry.copy(userName = accountUser.name)
+                        } else {
+                            entry
+                        }
+                    }
+                } else {
+                    result
+                }
+                leaderboard = updated
+                totalParticipants = updated.size
                 currentUserRank = if (currentUserId.isNotEmpty()) {
-                    val index = result.indexOfFirst { it.userId == currentUserId }
+                    val index = updated.indexOfFirst { it.userId == currentUserId }
                     if (index >= 0) index + 1 else 0
                 } else 0
             } else {
