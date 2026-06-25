@@ -42,6 +42,8 @@ class ProfileViewModel : ViewModel() {
     var photoFileId by mutableStateOf<String?>(null)
         private set
 
+    private var currentUserId: String? = null
+
     fun updatePhotoPath(path: String?) {
         profilePhotoPath = path
     }
@@ -77,6 +79,7 @@ class ProfileViewModel : ViewModel() {
             isLoading = true
             val user = authRepository.getCurrentUser()
             if (user != null) {
+                currentUserId = user.id
                 userName = user.name
                 userEmail = user.email ?: ""
                 val (best, completed) = QuizRepository.getUserStats(user.id)
@@ -102,9 +105,8 @@ class ProfileViewModel : ViewModel() {
                 if (newName != userName) {
                     authRepository.updateName(newName)
                     userName = newName
-                    val user = authRepository.getCurrentUser()
-                    if (user != null) {
-                        QuizRepository.updateUserNameInHistory(user.id, newName)
+                    currentUserId?.let { uid ->
+                        QuizRepository.updateUserNameInHistory(uid, newName)
                     }
                 }
                 if (newEmail != null && newEmail != userEmail) {
