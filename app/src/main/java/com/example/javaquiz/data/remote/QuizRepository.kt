@@ -119,6 +119,23 @@ object QuizRepository {
         }
     }
 
+    suspend fun updateUserNameInHistory(userId: String, newName: String) = withContext(Dispatchers.IO) {
+        try {
+            val queries = listOf(io.appwrite.Query.equal("user_id", userId))
+            val response = databases.listDocuments(DATABASE_ID, QUIZ_HISTORY_COLLECTION_ID, queries)
+            response.documents.forEach { doc ->
+                try {
+                    databases.updateDocument(
+                        databaseId = DATABASE_ID,
+                        collectionId = QUIZ_HISTORY_COLLECTION_ID,
+                        documentId = doc.id,
+                        data = mapOf("user_name" to newName)
+                    )
+                } catch (_: Exception) {}
+            }
+        } catch (_: Exception) {}
+    }
+
     suspend fun getQuizHistory(userId: String): List<QuizHistory> = withContext(Dispatchers.IO) {
         try {
             val queries = listOf(

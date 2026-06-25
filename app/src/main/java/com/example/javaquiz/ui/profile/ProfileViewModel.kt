@@ -102,6 +102,10 @@ class ProfileViewModel : ViewModel() {
                 if (newName != userName) {
                     authRepository.updateName(newName)
                     userName = newName
+                    val user = authRepository.getCurrentUser()
+                    if (user != null) {
+                        QuizRepository.updateUserNameInHistory(user.id, newName)
+                    }
                 }
                 if (newEmail != null && newEmail != userEmail) {
                     try {
